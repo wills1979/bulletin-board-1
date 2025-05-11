@@ -14,6 +14,10 @@ class BoardsController < ApplicationController
 
     @the_board = matching_boards.at(0)
 
+    @active_posts = Post.where({ :board_id => the_id}).where("expires_on > ?", Date.today)
+    
+    @expired_posts = Post.where({ :board_id => the_id}).where("expires_on <= ?", Date.today)
+
     render({ :template => "boards/show" })
   end
 
@@ -29,26 +33,4 @@ class BoardsController < ApplicationController
     end
   end
 
-  def update
-    the_id = params.fetch("path_id")
-    the_board = Board.where({ :id => the_id }).at(0)
-
-    the_board.name = params.fetch("query_name")
-
-    if the_board.valid?
-      the_board.save
-      redirect_to("/boards/#{the_board.id}", { :notice => "Board updated successfully."} )
-    else
-      redirect_to("/boards/#{the_board.id}", { :alert => the_board.errors.full_messages.to_sentence })
-    end
-  end
-
-  def destroy
-    the_id = params.fetch("path_id")
-    the_board = Board.where({ :id => the_id }).at(0)
-
-    the_board.destroy
-
-    redirect_to("/boards", { :notice => "Board deleted successfully."} )
-  end
 end
